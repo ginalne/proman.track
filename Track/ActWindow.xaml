@@ -1,0 +1,442 @@
+﻿<Window x:Class="Track.ActWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Track"
+        mc:Ignorable="d"
+        Title="Ginalne Activity Track App" Height="640" Width="420" MinWidth="420" MaxWidth="420">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisConverter" />
+        <SolidColorBrush x:Key="StandardBorderBrush" Color="#888" />
+        <SolidColorBrush x:Key="StandardBackgroundBrush" Color="Black" />
+        <SolidColorBrush x:Key="HoverBorderBrush" Color="#DDD" />
+        <SolidColorBrush x:Key="SelectedBackgroundBrush" Color="Gray" />
+        <SolidColorBrush x:Key="SelectedForegroundBrush" Color="White" />
+        <SolidColorBrush x:Key="DisabledForegroundBrush" Color="#888" />
+        <SolidColorBrush x:Key="GlyphBrush" Color="#444" />
+        <SolidColorBrush x:Key="NormalBrush" Color="#888" />
+        <SolidColorBrush x:Key="NormalBorderBrush" Color="#888" />
+        <SolidColorBrush x:Key="HorizontalNormalBrush" Color="#FF686868" />
+        <SolidColorBrush x:Key="HorizontalNormalBorderBrush" Color="#888" />
+
+        <LinearGradientBrush x:Key="ListBoxBackgroundBrush" StartPoint="0,0" EndPoint="1,0.001">
+            <GradientBrush.GradientStops>
+                <GradientStopCollection>
+                    <GradientStop Color="White" Offset="0.0" />
+                    <GradientStop Color="White" Offset="0.6" />
+                    <GradientStop Color="#DDDDDD" Offset="1.2"/>
+                </GradientStopCollection>
+            </GradientBrush.GradientStops>
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="StandardBrush" StartPoint="0,0" EndPoint="0,1">
+            <GradientBrush.GradientStops>
+                <GradientStopCollection>
+                    <GradientStop Color="#FFF" Offset="0.0"/>
+                    <GradientStop Color="#CCC" Offset="1.0"/>
+                </GradientStopCollection>
+            </GradientBrush.GradientStops>
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="PressedBrush" StartPoint="0,0" EndPoint="0,1">
+            <GradientBrush.GradientStops>
+                <GradientStopCollection>
+                    <GradientStop Color="#BBB" Offset="0.0"/>
+                    <GradientStop Color="#EEE" Offset="0.1"/>
+                    <GradientStop Color="#EEE" Offset="0.9"/>
+                    <GradientStop Color="#FFF" Offset="1.0"/>
+                </GradientStopCollection>
+            </GradientBrush.GradientStops>
+        </LinearGradientBrush>
+
+        <Style x:Key="ScrollBarLineButton" TargetType="{x:Type RepeatButton}">
+            <Setter Property="Visibility" Value="Hidden"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="OverridesDefaultStyle" Value="true"/>
+            <Setter Property="Focusable" Value="false"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type RepeatButton}">
+                        <Border Name="Border" Margin="1" CornerRadius="2" Background="{StaticResource NormalBrush}" BorderBrush="{StaticResource NormalBorderBrush}" BorderThickness="1">
+                            <Path HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{StaticResource GlyphBrush}" Data="{Binding Path=Content, RelativeSource={RelativeSource TemplatedParent}}" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsPressed" Value="true">
+                                <Setter TargetName="Border" Property="Background" Value="{StaticResource PressedBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Foreground" Value="{StaticResource DisabledForegroundBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="ScrollBarPageButton" TargetType="{x:Type RepeatButton}">
+            <Setter Property="Visibility" Value="Hidden"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="OverridesDefaultStyle" Value="true"/>
+            <Setter Property="IsTabStop" Value="false"/>
+            <Setter Property="Focusable" Value="false"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type RepeatButton}">
+                        <Border Background="Black" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ScrollBarThumb" TargetType="{x:Type Thumb}">
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="OverridesDefaultStyle" Value="true"/>
+            <Setter Property="IsTabStop" Value="false"/>
+            <Setter Property="Focusable" Value="false"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Thumb}">
+                        <Border CornerRadius="4" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="0"  Width="4" Margin="0,0,0,0"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <ControlTemplate x:Key="VerticalScrollBar" TargetType="{x:Type ScrollBar}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition MaxHeight="0"/>
+                    <RowDefinition Height="0.00001*"/>
+                    <RowDefinition MaxHeight="0"/>
+                </Grid.RowDefinitions>
+                <Border Grid.RowSpan="3" CornerRadius="2" Background="Transparent" />
+                <RepeatButton Grid.Row="0" Style="{StaticResource ScrollBarLineButton}" Height="18" Command="ScrollBar.LineUpCommand" Content="M 0 4 L 8 4 L 4 0 Z" />
+                <Track Name="PART_Track" Grid.Row="1" IsDirectionReversed="true">
+                    <Track.DecreaseRepeatButton>
+                        <RepeatButton Style="{StaticResource ScrollBarPageButton}" Command="ScrollBar.PageUpCommand" />
+                    </Track.DecreaseRepeatButton>
+                    <Track.Thumb>
+                        <Thumb Style="{StaticResource ScrollBarThumb}" Margin="1,0,1,0" Background="{StaticResource HorizontalNormalBrush}" BorderBrush="{StaticResource HorizontalNormalBorderBrush}" />
+                    </Track.Thumb>
+                    <Track.IncreaseRepeatButton>
+                        <RepeatButton Style="{StaticResource ScrollBarPageButton}" Command="ScrollBar.PageDownCommand" />
+                    </Track.IncreaseRepeatButton>
+                </Track>
+                <RepeatButton Grid.Row="3" Style="{StaticResource ScrollBarLineButton}" Height="18" Command="ScrollBar.LineDownCommand" Content="M 0 0 L 4 4 L 8 0 Z"/>
+            </Grid>
+        </ControlTemplate>
+        <ControlTemplate x:Key="HorizontalScrollBar" TargetType="{x:Type ScrollBar}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition MaxWidth="18"/>
+                    <ColumnDefinition Width="0.00001*"/>
+                    <ColumnDefinition MaxWidth="18"/>
+                </Grid.ColumnDefinitions>
+                <Border Grid.ColumnSpan="3" CornerRadius="2" Background="#F0F0F0"/>
+                <RepeatButton Grid.Column="0"  Style="{StaticResource ScrollBarLineButton}" Width="18" Command="ScrollBar.LineLeftCommand" Content="M 4 0 L 4 8 L 0 4 Z" />
+                <Track Name="PART_Track" Grid.Column="1" IsDirectionReversed="False">
+                    <Track.DecreaseRepeatButton>
+                        <RepeatButton Style="{StaticResource ScrollBarPageButton}" Command="ScrollBar.PageLeftCommand" />
+                    </Track.DecreaseRepeatButton>
+                    <Track.Thumb>
+                        <Thumb Style="{StaticResource ScrollBarThumb}" Margin="0,1,0,1" Background="{StaticResource NormalBrush}" BorderBrush="{StaticResource NormalBorderBrush}" />
+                    </Track.Thumb>
+                    <Track.IncreaseRepeatButton>
+                        <RepeatButton Style="{StaticResource ScrollBarPageButton}" Command="ScrollBar.PageRightCommand" />
+                    </Track.IncreaseRepeatButton>
+                </Track>
+                <RepeatButton Grid.Column="3" Style="{StaticResource ScrollBarLineButton}" Width="18" Command="ScrollBar.LineRightCommand" Content="M 0 0 L 4 4 L 0 8 Z"/>
+            </Grid>
+        </ControlTemplate>
+        <Style x:Key="{x:Type ScrollBar}" TargetType="{x:Type ScrollBar}">
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="OverridesDefaultStyle" Value="true"/>
+            <Style.Triggers>
+                <Trigger Property="Orientation" Value="Horizontal">
+                    <Setter Property="Width" Value="Auto"/>
+                    <Setter Property="Height" Value="9" />
+                    <Setter Property="Template" Value="{StaticResource HorizontalScrollBar}" />
+                </Trigger>
+                <Trigger Property="Orientation" Value="Vertical">
+                    <Setter Property="Width" Value="9"/>
+                    <Setter Property="Height" Value="Auto" />
+                    <Setter Property="Template" Value="{StaticResource VerticalScrollBar}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="FavsScrollViewer" TargetType="{x:Type ScrollViewer}">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ScrollViewer}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <ScrollContentPresenter Grid.Column="1"/>
+                            <ScrollBar Name="PART_VerticalScrollBar" Value="{TemplateBinding VerticalOffset}" Maximum="{TemplateBinding ScrollableHeight}" ViewportSize="{TemplateBinding ViewportHeight}" Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"/>
+                            <ScrollBar Name="PART_HorizontalScrollBar" Orientation="Horizontal" Grid.Row="1" Grid.Column="1" Value="{TemplateBinding HorizontalOffset}" Maximum="{TemplateBinding ScrollableWidth}" ViewportSize="{TemplateBinding ViewportWidth}" Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!--<Style x:Key="listNoBack" TargetType="{x:Type ListBoxItem}">
+            <Setter Property="OverridesDefaultStyle" Value="True"></Setter>
+        </Style>-->
+    </Window.Resources>
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="E_xport" />
+                <MenuItem Header="I_mport" />
+                <Separator />
+                <MenuItem Header="_Configuration" />
+                <MenuItem Header="_Exit" />
+            </MenuItem>
+            <MenuItem Header="_Project/Product">
+                <MenuItem Header="_Selected : Leaf Life" />
+                <MenuItem Header="_Change">
+                    <MenuItem Header="Leaf Life" />
+                    <MenuItem Header="Angular Course" />
+                    <MenuItem Header="Vipra" />
+                </MenuItem>
+            </MenuItem>
+            <MenuItem Header="_Account">
+                <MenuItem Header="_Logged : @harbimartin"/>
+                <MenuItem IsEnabled="False" Header="_Login" />
+                <MenuItem Header="_Register" />
+                <Separator/>
+                <MenuItem Header="Change Account..."/>
+                <MenuItem Header="_Sign-out" />
+            </MenuItem>
+            <MenuItem Header="_More...">
+                <MenuItem Header="Go _To Proman..." />
+                <MenuItem Header="About P_roman"/>
+                <MenuItem Header="About _Ginalne"/>
+                <Separator />
+                <MenuItem Header="_License Overview"/>
+                <MenuItem IsEnabled="False" Header="_Registering License..."/>
+                <Separator />
+            </MenuItem>
+        </Menu>
+        <Grid>
+            <Rectangle x:Name="underlineRect" Stretch="UniformToFill" Fill="#FF042C31" Grid.Column="0" Grid.ColumnSpan="3"
+	       Height="94" VerticalAlignment="Top"/>
+            <Button HorizontalAlignment="Left" Height="74" Margin="10,10,0,0" VerticalAlignment="Top" Width="74" Cursor="Hand"
+                    Click="toggleTimer">
+                <Button.Style>
+                    <Style TargetType="{x:Type Button}">
+                        <Setter Property="Background" Value="Green"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type Button}">
+                                    <Border Background="{TemplateBinding Background}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="DarkGoldenrod"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+                            <Ellipse>
+                                <Ellipse.Style>
+                                    <Style TargetType="{x:Type Ellipse}">
+                                        <Setter Property="Fill" Value="{Binding Path=acts_button}" />
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Fill" Value="{Binding Path=acts_button_hover}">
+                                                </Setter>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Ellipse.Style>
+                            </Ellipse>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Button.Template>
+                <Button.Content>
+                    <StackPanel VerticalAlignment="Center" 
+                    HorizontalAlignment="Center" Orientation="Horizontal" 
+                    Background="Transparent" Height="35" Margin="0,0,0,0">
+                        <StackPanel.Style>
+                            <Style TargetType="{x:Type StackPanel}">
+                                <Setter Property="IsHitTestVisible" Value="False"></Setter>
+                            </Style>
+                        </StackPanel.Style>
+                        <Viewbox Margin="3.5,0,0,0" Visibility="{Binding Path=isStoping, Converter={StaticResource BoolToVisConverter}, Mode=OneWay}">
+                            <Path Name="PlayIcon" 
+							VerticalAlignment="Center" HorizontalAlignment="Left" 
+							Data="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z" Height="2" Stretch="Fill" Width="2" Fill="White"
+						/>
+                        </Viewbox>
+                        <Viewbox>
+                            <Path Name="PauseIcon" Visibility="{Binding Path=isPlaying, Converter={StaticResource BoolToVisConverter}, Mode=OneWay}"
+							VerticalAlignment="Center" HorizontalAlignment="Center" 
+							Data="M6 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5zm4 0a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5z" Height="1" Stretch="Fill" Width="1" Fill="White"
+						/>
+                        </Viewbox>
+                    </StackPanel>
+                </Button.Content>
+            </Button>
+            <TextBox IsReadOnly="{Binding Path=isPlaying}" Name="activityName" HorizontalAlignment="Left" Height="34"  Text="{Binding Path=acts_name, Mode=OneWay}" TextChanged="actsInput" Margin="91,33,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="194" Background="#FF072529"  Foreground="White" FontSize="22" SelectionBrush="#FF76B4B1" CaretBrush="White" SelectionTextBrush="{x:Null}" BorderBrush="{x:Null}"/>
+            <ListBox Visibility="{Binding onSearch, Converter={StaticResource BoolToVisConverter}}" Panel.ZIndex="10" ItemsSource="{Binding Path=headerSearch, Mode=OneWay}" Margin="96,67,15,242" SelectedItem="{Binding Path=actsSelected, Mode=OneWayToSource}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Width="385">
+                            <TextBlock HorizontalAlignment="Left" Height="20" Margin="5,6,0,0" Text="{Binding Path=Path}" TextWrapping="Wrap" VerticalAlignment="Top" Width="274" Foreground="#FF0E6992" FontFamily="Arial" Grid.Row="30"/>
+                            <StackPanel Orientation="Horizontal" Margin="5,21,0,4" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                <Border
+                                        CornerRadius="10"
+                                        Width="30"
+                                        Height="20"
+                                        Background="{Binding Path=Color}" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Path=task.weight}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" FontWeight="Bold" FontFamily="Arial"/>
+                                </Border>
+                                <TextBlock  Height="22" Text="{Binding Path=Name}" TextWrapping="Wrap" Width="211" Background="{x:Null}"  Foreground="Black" FontSize="16" Margin="5,0,0,0"/>
+                            </StackPanel>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+                <ListBox.Template>
+                    <ControlTemplate>
+                        <local:WheelSpeedScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden" ScrollViewer.CanContentScroll="False" Background="White">
+                                <ItemsPresenter IsHitTestVisible="True" HorizontalAlignment="Left"/>
+                        </local:WheelSpeedScrollViewer>
+                    </ControlTemplate>
+                </ListBox.Template>
+            </ListBox>
+            <TextBlock HorizontalAlignment="Right" Height="30" Margin="0,35,15,0" Text="{Binding Path=acts_duration}" TextWrapping="Wrap" VerticalAlignment="Top" Width="100" Foreground="#FFE0F2C5" FontFamily="Arial" FontWeight="Normal" Grid.Column="1" FontSize="22" Grid.ColumnSpan="2" TextAlignment="Right"/>
+            <TextBlock HorizontalAlignment="Right" Height="19" Margin="0,67,15,0" Text="{Binding Path=acts_start}" TextWrapping="Wrap" VerticalAlignment="Top" Width="204" TextAlignment="Right" Cursor="Hand" Foreground="#FFE7FDDE" FontWeight="Bold"/>
+            <TextBlock Grid.ColumnSpan="3" HorizontalAlignment="Left" Height="20" Margin="96,16,0,0" Text="{Binding Path=acts_path}" TextWrapping="Wrap" VerticalAlignment="Top" Width="274" Foreground="#FFC5E4F2" FontFamily="Arial" FontWeight="Normal"/>
+            <Label Content="Started Time :" HorizontalAlignment="Left" Margin="89,62,0,0" VerticalAlignment="Top" Cursor="AppStarting" IsEnabled="False" Foreground="LightGray"/>
+
+            <!--<ScrollViewer HorizontalAlignment="Center" Height="509" Margin="0,97,0,0" VerticalAlignment="Top" Width="380" >
+                <ListView ItemsSource="{Binding Path=Activities}" Background="Silver" Margin="0" SelectedIndex="0"/>
+            </ScrollViewer>-->
+            <ListBox ItemsSource="{Binding Path=Activities, Mode=OneWay}" Margin="0,93,0,0" SelectedItem="{Binding Path=acts, Mode=OneWayToSource}">
+                <!--<ListBox.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="EMail" 
+                      Command="{Binding WriteMailCommand}" 
+                      CommandParameter="{Binding SelectedPerson}" />
+                    </ContextMenu>
+                </ListBox.ContextMenu>-->
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel>
+                            <Grid Width="385">
+                                <TextBlock HorizontalAlignment="Right" Height="30" Margin="0,6,0,0" Text="{Binding Path=Duration}" TextWrapping="Wrap" VerticalAlignment="Top" Width="150" Foreground="#FF38402B" FontFamily="Arial" FontWeight="Normal" FontSize="20" TextAlignment="Right" Grid.RowSpan="50"/>
+                                <TextBlock HorizontalAlignment="Right" Height="19" Margin="200,28,0,0" Text="{Binding Path=Start}" TextWrapping="Wrap" VerticalAlignment="Top" Width="150" TextAlignment="Right" Foreground="#FF4C5947" FontWeight="SemiBold"/>
+                                <TextBlock HorizontalAlignment="Left" Height="20" Margin="15,6,0,0" Text="{Binding Path=Path}" TextWrapping="Wrap" VerticalAlignment="Top" Width="274" Foreground="#FF0E6992" FontFamily="Arial" Grid.Row="30"/>
+                                <StackPanel Orientation="Horizontal" Margin="15,21,0,4" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                    <Border
+                                        CornerRadius="10"
+                                        Width="30"
+                                        Height="20"
+                                        Background="{Binding Path=Color}" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Path=Weight}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" FontWeight="Bold" FontFamily="Arial"/>
+                                    </Border>
+                                    <TextBlock  Height="22" Text="{Binding Path=Name}" TextWrapping="Wrap" Width="211" Background="{x:Null}"  Foreground="Black" FontSize="16" Margin="5,0,0,0"/>
+                                </StackPanel>
+                            </Grid>
+                            <ListBox ItemsSource="{Binding Path=time}">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Border BorderThickness="1" CornerRadius="4" Background="#FFFEFDFF" BorderBrush="#FF95BCCF" Padding="4,2,4,2">
+                                                <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Text="{Binding Path=TimeSpan}" ></TextBlock>
+                                            </Border>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                                <ListBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Orientation="Horizontal" IsItemsHost="True" MaxWidth="400">
+                                        </WrapPanel>
+                                    </ItemsPanelTemplate>
+                                </ListBox.ItemsPanel>
+                            </ListBox>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+                <ListBox.Template>
+                    <ControlTemplate>
+                        <local:WheelSpeedScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden" ScrollViewer.CanContentScroll="False">
+                            <StackPanel>
+                                <ItemsPresenter IsHitTestVisible="True" HorizontalAlignment="Left"/>
+                                <Button Click="getMore" Padding="40,6" Content="Load More Activities" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,20,0,20" FontWeight="Normal" BorderBrush="{x:Null}" Background="Lime">
+                                    <Button.Style>
+                                        <Style TargetType="{x:Type Button}">
+                                            <Setter Property="Cursor" Value="Hand"/>
+                                            <Setter Property="OverridesDefaultStyle" Value="True"/>
+                                            <Setter Property="Foreground" Value="White"/>
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="Button">
+                                                        <Border Name="border" 
+                                                            Padding="{TemplateBinding Padding}" 
+                                                            CornerRadius="3" 
+                                                            Background="#FF1C5559">
+                                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                        </Border>
+                                                        <ControlTemplate.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter TargetName="border" Property="Background" Value="#FF124548" />
+                                                            </Trigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                            </StackPanel>
+                        </local:WheelSpeedScrollViewer>
+                    </ControlTemplate>
+                </ListBox.Template>
+            </ListBox>
+            <!--<ListBox ScrollViewer.CanContentScroll="False" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Width="400" Margin="0,93,0,0">
+                <Grid Width="385">
+                    <TextBlock HorizontalAlignment="Right" Height="30" Margin="0,6,16,0" Text="10h 20m" TextWrapping="Wrap" VerticalAlignment="Top" Width="100" Foreground="#FF38402B" FontFamily="Arial" FontWeight="Normal" FontSize="20" TextAlignment="Right"/>
+                    <TextBlock HorizontalAlignment="Left" Height="20" Margin="10,6,0,0" Text="Concept/Wrap/Test" TextWrapping="Wrap" VerticalAlignment="Top" Width="274" Foreground="#FF0E6992" FontFamily="Arial"/>
+                    <StackPanel Orientation="Horizontal" Margin="10,21,134,4">
+                        <Border
+                            CornerRadius="10"
+                            Width="30"
+                            Height="20"
+                            Background="#633" HorizontalAlignment="Left" VerticalAlignment="Center">
+                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" FontWeight="Bold" FontFamily="Arial">10
+                            </TextBlock>
+                        </Border>
+                        <TextBlock  Height="22" Text="My Activity" TextWrapping="Wrap" Width="211" Background="{x:Null}"  Foreground="Black" FontSize="16" Margin="5,0,0,0"/>
+                    </StackPanel>
+                    <TextBlock HorizontalAlignment="Left" Height="19" Margin="242,28,0,0" Text="2022-09-09 20:20:20" TextWrapping="Wrap" VerticalAlignment="Top" Width="127" TextAlignment="Right" Cursor="Hand" Foreground="#FF4C5947" FontWeight="SemiBold"/>
+                </Grid>
+
+                -->
+            <!--<ListBox.Style>
+                        <Style TargetType="{x:Type ListBox}">
+                            <Setter Property="ScrollViewer." Value="False"></Setter>
+                        </Style>
+                    </ListBox.Style>-->
+            <!--
+            </ListBox-->
+
+        </Grid>
+    </DockPanel>
+</Window>
